@@ -12,8 +12,8 @@ A hands-on walkthrough that traces the path from raw LLM inference to a fully fu
 
 | # | Section | What you'll see |
 |---|---------|-----------------|
-| A | **Large Language Models** | Running IBM Granite 4.1 locally — base vs. fine tuned model |
-| B | **Inference Server** | OpenAI-compatible API, using language models as a service and tool calling |
+| A | **Language Models** | Running IBM Granite 4.1 locally — base vs. fine tuned model |
+| B | **Inference Servers** | OpenAI-compatible API, using language models as a service and tool calling |
 | C | **Skills or Tools** | Bash shell vs. MCP — why structured tools matter - or - do you need MCP? |
 | D | **From CLI to MCP** | Adding MCP support to an existing CLI (`kubectl-mtv`) |
 

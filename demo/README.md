@@ -1,7 +1,7 @@
 # Demo Scripts
 
-All scripts are in a single flat directory, prefixed by section letter and
-run order so you can find and execute them without navigating subdirectories.
+Live demos for the "From CLI to MCP in 20 Minutes" talk.
+Files are prefixed `a1-`, `b1-`, `d1-` … matching the presentation sections.
 
 ## Setup
 
@@ -11,7 +11,7 @@ export HF_HUB_ENABLE_HF_TRANSFER=1
 ```
 
 Start a local inference server (e.g. LM Studio, vLLM, Ollama) with
-Granite 4.1 Instruct on port 1234 for the Section B demos.
+Qwen 3.6 on port 1234 for the Section B demos.
 
 ---
 
@@ -52,6 +52,8 @@ Conceptual slides — no runnable demos. To view the CLI help live:
 
 ```bash
 oc mtv help
+oc mtv help --machine | jq .            # full command schema as JSON (for MCP servers / automation)
+oc mtv help --machine --short | jq .    # condensed schema without descriptions or examples
 ```
 
 ## Section D — From CLI to MCP

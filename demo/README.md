@@ -54,6 +54,8 @@ Conceptual slides — no runnable demos. To view the CLI help live:
 oc mtv help
 oc mtv help --machine | jq .            # full command schema as JSON (for MCP servers / automation)
 oc mtv help --machine --short | jq .    # condensed schema without descriptions or examples
+
+oc mtv mcp-server --http --host 127.0.0.1 --port 8081
 ```
 
 ## Section D — From CLI to MCP

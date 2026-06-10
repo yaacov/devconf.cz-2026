@@ -491,8 +491,8 @@ bash -c "kubectl mtv get plan | grep -i fail"
     <pre><code class="language-bash"># Scan the CLI's --help output → generate MCP tools
 cli2mcp scan kubectl-mtv -o mtv.tools.json
 
-# Start an MCP server exposing those tools
-cli2mcp serve mtv.tools.json</code></pre>
+# Start an MCP server exposing those tools (streamable HTTP)
+cli2mcp serve mtv.tools.json -t streamable-http</code></pre>
     <pre><code class="language-json">{"command": "kubectl-mtv", "tools": [
   {"name": "get",    "description": "Get resources",
    "args": [{"name": "resource", "type": "string"}]},
@@ -611,11 +611,11 @@ kubectl mtv get plans</code></pre>
     <span class="section-marker">From CLI to MCP</span>
     <h2>Live Agent Session</h2>
     <h4>Tracing with mtv-agent</h4>
-    <pre><code class="language-bash">mtv-agent start --log-level=DEBUG --dump-http
+    <pre><code class="language-bash">mtv-agent run --dump-http
 
 # User: "Why is migration plan 'plan-01' failing?"
 
-# [DEBUG] Inbound payload:
+# HTTP/LLM dumps saved to: ~/.mtv-agent/dumps/
 # {"model":"instruct", "messages":[...],
 #  "tools":[{"name":"mtv_read"}]}</code></pre>
     <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
@@ -624,9 +624,9 @@ kubectl mtv get plans</code></pre>
 
       This is the payoff. mtv-agent ties everything we've built up into a live agent loop.
 
-      We enable debug logging so you can see every step: the system prompt, the tool
-      schemas sent to the model, the model's tool_calls response, the MCP execution, and
-      the final answer assembled from results.
+      We enable --dump-http so you can see every HTTP round-trip: the system prompt, the
+      tool schemas sent to the model, the model's tool_calls response, the MCP execution,
+      and the final answer assembled from results. Dumps are saved to ~/.mtv-agent/dumps/.
 
       Ask it "Why is migration plan plan-01 failing?" and watch the full cycle: user
       question → tool schema packaging → LLM inference → tool_calls response → MCP

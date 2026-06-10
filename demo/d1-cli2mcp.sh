@@ -12,4 +12,4 @@ echo
 
 echo "=== Serve as MCP server (streamable-http, port 8081) ==="
 echo "(Press Ctrl+C to stop)"
-cli2mcp serve mtv.tools.json --port 8081
+cli2mcp serve mtv.tools.json -t streamable-http --port 8081

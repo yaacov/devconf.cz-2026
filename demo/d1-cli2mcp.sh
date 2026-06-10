@@ -2,7 +2,6 @@
 # Start the MCP server (streamable-http)
 # Option A: Use the embedded Go MCP daemon
 # Option B: Scan CLI and serve via cli2mcp
-set -euo pipefail
 
 echo "=== Scan kubectl-mtv CLI ==="
 cli2mcp scan kubectl-mtv -o mtv.tools.json

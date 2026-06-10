@@ -68,5 +68,5 @@ oc mtv help --machine --short | jq .    # condensed schema without descriptions 
 bash d1-cli2mcp.sh                  # start server, then in another terminal:
 bash d2-mcp-flow.sh
 
-bash d3-agent.sh
+bash d3-agent.sh                    # putting it all together, how a complete agent work
 ```

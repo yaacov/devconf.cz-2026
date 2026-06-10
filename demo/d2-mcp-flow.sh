@@ -1,6 +1,5 @@
 #!/bin/bash
 # Full MCP flow: initialize → discover tools → call tool → compare with CLI
-set -euo pipefail
 
 MCP="http://localhost:8081/mcp"
 ACCEPT="Accept: application/json, text/event-stream"

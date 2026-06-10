@@ -47,3 +47,6 @@ curl -s -X POST "$MCP" \
     }
   }
 }' | grep "^data:" | sed 's/^data: //' | jq .
+
+# Direct CLI call:
+# oc mtv get plans -n openshift-mtv

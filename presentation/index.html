@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demystifying MCP Servers: Live Demo Edition</title>
+  <link rel="stylesheet" href="vendor/node_modules/reveal.js/dist/reset.css">
+  <link rel="stylesheet" href="vendor/node_modules/reveal.js/dist/reveal.css">
+  <link rel="stylesheet" href="themes/redhat/redhat.css">
+  <link rel="stylesheet" href="vendor/node_modules/reveal.js/plugin/highlight/monokai.css">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- Slide 1: Title -->
+  <section class="slide-title">
+    <div class="title-wrapper">
+      <div class="title-left">
+        <span class="title-vertical-text">Live Demo Edition</span>
+        <span class="title-page-number">1</span>
+        <div class="title-left-accent"></div>
+      </div>
+      <div class="title-right">
+        <h1>From CLI to MCP<br>in 20 Minutes</h1>
+        <h3>Demystifying MCP Servers</h3>
+        <div class="presenter-info">
+          Yaacov Zamir &lt;yzamir@redhat.com&gt;<br>
+          DevConf.CZ 2026
+        </div>
+        <img class="title-logo" src="themes/redhat/Logo-Red_Hat-A-Standard-RGB.Large_logo_transparent.png" alt="Red Hat">
+      </div>
+    </div>
+    <aside class="notes">
+        Goal: Introduce this highly technical, demo-focused edition of the talk.
+
+        Welcome. This session is designed as a direct "show, don't tell" companion to our
+        architectural overview.
+
+        We will start with raw Python scripts to see how models run inside local memory,
+        comparing the raw text completion of a Granite 4.1 base model to an instruct model.
+
+        Then, we'll show how we build on top of this by wrapping the models in an inference
+        server to expose an API, manage state, and advertise tools.
+
+        Finally, we'll transition to how we implement these concepts at the agentic system layer,
+        running kubectl-mtv as an embedded HTTP/SSE daemon to expose standard agent interfaces
+        and tracing end-to-end agentic transaction loops with mtv-agent.
+    </aside>
+  </section>
+
+  <!-- Slide 2: Agenda -->
+  <section class="slide-toc">
+    <span class="section-marker">Agenda</span>
+    <span class="toc-page-number">2</span>
+    <div class="toc-layout">
+      <div class="toc-intro">This session<br>includes:</div>
+      <ul class="toc-topics">
+        <li>
+          <span class="topic-name">Language Models</span>
+          <span class="topic-detail">Basic Building Blocks</span>
+        </li>
+        <li>
+          <span class="topic-name">Inference Servers</span>
+          <span class="topic-detail">OpenAI API, De Facto Standard</span>
+        </li>
+        <li>
+          <span class="topic-name">Skills or Tools</span>
+          <span class="topic-detail">What Is Best for My Use Case</span>
+        </li>
+        <li>
+          <span class="topic-name">From CLI to MCP</span>
+          <span class="topic-detail">Adding MCP Support to My CLI</span>
+        </li>
+      </ul>
+    </div>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Set the expectations for the active code, curl requests, and commands to be typed and run.
+
+      This is a four-part sequence designed to show progress from raw matrices up to high-level system agents.
+
+      We'll begin in Python loading model weights directly on our GPU using the Hugging Face transformers library.
+      Next, we shift to LM Studio to show how an API wrapper enables structured JSON interactions and tool declarations.
+      Then, we will explore the HTTP/SSE transport of our embedded Go-based MCP server directly inside kubectl-mtv.
+      We'll finish by analyzing real-time agentic loop transactions and tracing with mtv-agent.
+    </aside>
+  </section>
+
+  <!-- ==================== Section A: Language Models ==================== -->
+
+  <section class="slide-divider">
+    <div class="divider-wrapper">
+    <div class="divider-left">
+      <span class="section-marker">Language Models</span>
+      <h2>Language<br>Models</h2>
+    </div>
+    <div class="divider-right">
+      <p>Basic Building Blocks</p>
+    </div>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    </div>
+    <aside class="notes">
+      Section intro: We start with raw Python to see how models run in local memory.
+    </aside>
+  </section>
+
+  <!-- Slide: Raw Base Model -->
+  <section class="slide-content">
+    <span class="section-marker">Language Models</span>
+    <h2>Language Models</h2>
+    <h4>Base Model, Text Completion</h4>
+    <pre><code class="language-python">from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model_path = "ibm-granite/granite-4.1-8b-base"
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+model = AutoModelForCausalLM.from_pretrained(model_path, device_map="auto")
+
+prompt = "If you want to migrate a virtual machine to KubeVirt,"
+outputs = model.generate(tokenizer(prompt, return_tensors="pt").to("mps"))
+print(tokenizer.decode(outputs[0]))</code></pre>
+    <pre><code class="language-text"># Output: " you must first prepare the source environment.
+#   This book covers migrations from VMware vSphere ..."</code></pre>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Show that base models are raw sentence completion engines running locally in system memory.
+
+      Let's start by querying a raw base model using a simple Python script. No API wrapper,
+      no servers — just direct weight execution.
+
+      We load IBM's Granite 4.1 8B Base model into local memory using transformers and send
+      an unfinished sentence as a prompt.
+
+      The weights don't recognize an instruction; instead, they compute the mathematically most
+      likely sequence continuation based on internet text.
+
+      The response reads like a paragraph from a documentation guide or book, which is exactly
+      the pattern of raw data the base model was trained on.
+    </aside>
+  </section>
+
+  <!-- Slide 4: Instruct Model -->
+  <section class="slide-content">
+    <span class="section-marker">Language Models</span>
+    <h2>Instruct Model</h2>
+    <h4>Fine-Tuned to Follow Instructions</h4>
+    <pre><code class="language-python">chat = [{"role": "user", "content": "How do I list VM migrations?"}]
+prompt = tokenizer.apply_chat_template(chat, add_generation_prompt=True)
+print(prompt)</code></pre>
+    <pre><code class="language-text"># &lt;|start_header|&gt;user&lt;|end_header|&gt;
+# How do I list VM migrations?&lt;|eot|&gt;
+# &lt;|start_header|&gt;assistant&lt;|end_header|&gt;</code></pre>
+    <pre><code class="language-python">outputs = model.generate(tokenizer(prompt, return_tensors="pt").to("mps"))
+print(tokenizer.decode(outputs[0]))</code></pre>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Demonstrate how instruction tuning redirects sequence prediction into problem-solving.
+
+      Now let's run the instruct-tuned variant of the exact same Granite 4.1 model.
+
+      In our Python code, we introduce structure. We wrap our query in a list of role-based
+      messages and run it through the tokenizer's chat template.
+
+      This chat template injects system control tokens (like start_header_id) to construct
+      syntactic boundaries.
+
+      The model detects the instruction structure and, instead of continuing the sentence,
+      outputs a direct terminal command to answer our question.
+
+      Now we see how models handle instructions. But running raw Python files is heavy and
+      stateful. How do we wrap this in a network API? Let's move to LM Studio.
+    </aside>
+  </section>
+
+  <!-- ==================== Section B: Inference Servers ==================== -->
+
+  <!-- Slide 5: API Layer (Divider) -->
+  <section class="slide-divider">
+    <div class="divider-wrapper">
+    <div class="divider-left">
+      <span class="section-marker">Inference Servers</span>
+      <h2>Inference<br>Servers</h2>
+    </div>
+    <div class="divider-right">
+      <p>OpenAI API, De Facto Standard</p>
+      <pre><code class="language-text">[ Model Weights ]
+       ▼
+[ Inference Server ]
+       ▼
+  HTTP + JSON API</code></pre>
+    </div>
+    </div>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Explain the architectural gap bridged by local/remote inference server wraps.
+
+      While running raw Python scripts is great for testing weights, it's highly stateful,
+      heavy, and complex to integrate into applications.
+
+      We need to decouple our application layer from our local machine memory lanes.
+
+      This is what an Inference Server (like LM Studio or vLLM) does. It wraps the raw
+      model-loading mechanics in a stateless, highly optimized HTTP REST server that speaks
+      the standard OpenAI JSON API.
+
+      Let's test this transition live using curl against our local inference server to
+      demonstrate how stateless JSON payloads drive our tools.
+    </aside>
+  </section>
+
+  <!-- Slide 6: Empty Tools Request -->
+  <section class="slide-content">
+    <span class="section-marker">Inference Servers</span>
+    <h2>Conversational Mode</h2>
+    <h4>What Happens Without Tools?</h4>
+    <pre><code class="language-bash">curl http://localhost:1234/v1/chat/completions -d '{
+  "messages": [
+    {"role": "user", "content": "Fetch migration plans inside the cluster"}
+  ],
+  "tools": []
+}'</code></pre>
+    <pre><code class="language-text"># Output: "I cannot access the cluster directly.
+#   Please run: kubectl mtv get plans"</code></pre>
+    <p style="font-size:0.38em; font-style:italic; color:var(--rh-gray-40); margin-top:0.8em;">* The <code style="font-size:1em; background:none; color:var(--rh-gray-40); padding:0;">/v1/chat/completions</code> endpoint is the OpenAI-compatible API — the de facto standard spoken by LM Studio, vLLM, Ollama, and others.</p>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Show how the aligned model reacts with text instructions when no external
+      tool system is advertised.
+
+      Notice the URL: /v1/chat/completions. This is the OpenAI-compatible API — the de facto
+      standard that virtually every inference server (LM Studio, vLLM, Ollama, etc.) now speaks.
+      We're hitting a local model, but the JSON shape is identical to what you'd send to OpenAI.
+
+      Here, we query our model through the inference wrapper. Note that we explicitly pass
+      an empty "tools": [] array in the JSON body.
+
+      The model processes our conversational intent ("Fetch migration plans"), but it knows
+      its limits: it is text-bound and cannot interact with systems directly.
+
+      It answers in plain Markdown, instructing us (the human operator) to perform the
+      terminal command.
+    </aside>
+  </section>
+
+  <!-- Slide 7: Tools Schema -->
+  <section class="slide-content">
+    <span class="section-marker">Inference Servers</span>
+    <h2>Tool Usage</h2>
+    <h4>The Request — Including a List of Available Tools</h4>
+    <pre><code class="language-bash">curl http://localhost:1234/v1/chat/completions -d '{
+  "messages": [{"role": "user", "content": "Fetch migration plans"}],
+  "tools": [{"type": "function", "function": {
+    "name": "mtv_read",
+    "description": "Query MTV resources (read-only)",
+    "parameters": {
+      "properties": {"command": {"type": "string"}, "flags": {"type": "object"}},
+      "required": ["command"]
+    }
+  }}]
+}'</code></pre>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Show how exposing a tools schema triggers a structural shift in the model's
+      generated response.
+
+      Now we send the exact same prompt, but we populate the "tools" array with a schema
+      describing our mtv_read function.
+
+      Because the model is trained to recognize schemas, its attention layers shift.
+
+      Instead of returning conversational text directing the user, the model will output a
+      machine-readable JSON execution request. Let's inspect the payload returned by the server.
+    </aside>
+  </section>
+
+  <!-- Slide 8: Tool Call Payload -->
+  <section class="slide-content">
+    <span class="section-marker">Inference Servers</span>
+    <h2>Tool Usage</h2>
+    <h4>The Response — A Structured Tool Call Instead of Text</h4>
+    <pre><code class="language-json">{"choices": [{
+  "message": {
+    "role": "assistant",
+    "content": null,
+    "tool_calls": [{
+      "function": {"name": "mtv_read",
+                   "arguments": "{\"command\": \"get plan\"}"}
+    }]
+  },
+  "finish_reason": "tool_calls"
+}]}</code></pre>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Deeply analyze the JSON tool execution payload returned by the model.
+
+      Look at this response payload. This is the magic of structured alignment.
+
+      Note that "content" is entirely null. The model did not output any conversational response.
+
+      Instead, it returned a structured "tool_calls" block, populated "arguments" as valid JSON
+      containing "resource": "plans", and set "finish_reason" to "tool_calls".
+
+      The model is no longer talking to us — it is calling our code!
+    </aside>
+  </section>
+
+  <!-- Slide: FastMCP Python Example -->
+  <section class="slide-content">
+    <span class="section-marker">Inference Servers</span>
+    <h2>Your First MCP Server</h2>
+    <h4>Implementing the Tool Call</h4>
+    <pre><code class="language-python">from fastmcp import FastMCP
+import subprocess
+
+mcp = FastMCP("mtv")
+
+@mcp.tool()
+def get_plan(namespace: str = "default") -> str:
+    """Get migration plans from the cluster"""
+    return subprocess.run(
+        ["kubectl", "mtv", "get", "plan", "-n", namespace],
+        capture_output=True, text=True).stdout
+
+mcp.run(transport="sse", port=8081)</code></pre>
+    <p style="font-size:0.38em; font-style:italic; color:var(--rh-gray-40); margin-top:0.8em;">* MCP (Model Context Protocol) standardizes how tools are discovered and called, regardless of model or server.</p>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Show how simple it is to implement the tool the model just called.
+
+      The model generated a tool_calls payload for mtv_read. Now we show how to
+      build the server that handles it. With FastMCP, you decorate a Python function
+      with @mcp.tool() and the framework generates the JSON schema, handles SSE
+      transport, and advertises the tool to any connecting agent.
+    </aside>
+  </section>
+
+  <!-- ==================== Section D: Skills or Tools ==================== -->
+
+  <section class="slide-divider">
+    <div class="divider-wrapper">
+    <div class="divider-left">
+      <span class="section-marker">Skills or Tools</span>
+      <h2>Skills or Tools</h2>
+    </div>
+    <div class="divider-right">
+      <p>What Is Best for My Use Case</p>
+    </div>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    </div>
+    <aside class="notes">
+      Section intro: How do LLMs discover and invoke CLI tools?
+    </aside>
+  </section>
+
+  <!-- Slide: Semantic CLI Help -->
+  <section class="slide-content">
+    <span class="section-marker">Skills or Tools</span>
+    <h2>Agent-Ready CLIs</h2>
+    <h4>Semantic Help for Agentic Flow</h4>
+    <pre><code class="language-text">$ oc mtv help
+Migration Toolkit for Virtualization (MTV) CLI.
+Migrate virtual machines from VMware vSphere, oVirt (RHV),
+OpenStack, and OVA to KubeVirt on OpenShift/Kubernetes.
+
+Available Commands:
+  create      Create resources
+  delete      Delete resources
+  get         Get resources
+  health      Check the health of the MTV/Forklift system
+  mcp-server  Start the MCP (Model Context Protocol) server</code></pre>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Explain why highly semantic and structured CLI help is a critical enabler for
+      LLM reasoning and agent loops.
+
+      In an agentic environment, when the LLM wants to run a shell CLI, it has to scan the
+      CLI's internal documentation (like running --help) to dynamically map its plan to the
+      correct commands.
+
+      Look at this actual help output from oc mtv help. It is highly optimized for machine
+      parsing and agentic flow.
+
+      First, it has a strong semantic header: "Migrate virtual machines... to KubeVirt".
+      This maps immediately to high-level model goals.
+
+      Second, it exposes clean, declarative command verbs instead of low-level option flags.
+      Commands like health or cutover represent direct operational intents.
+
+      When an agent reads this, it can map user requests directly to clean, predefined subcommands.
+    </aside>
+  </section>
+
+  <!-- Slide 10: CS Analogies -->
+  <section class="slide-content">
+    <span class="section-marker">Skills or Tools</span>
+    <h2>Bash Tool vs. MCP Server</h2>
+    <h4>One Shell to Rule Them All, or Dedicated Servers?</h4>
+    <pre><code class="language-bash"># Bash tool: the agent runs arbitrary commands
+bash -c "kubectl mtv get plan | grep -i fail"
+# → unrestricted, unpredictable, no schema</code></pre>
+    <pre><code class="language-json">// MCP server: the agent calls a typed function
+{"method": "tools/call",
+ "params": {"name": "mtv_read",
+            "arguments": {"command": "get plan"}}}
+// → sandboxed, discoverable, self-describing</code></pre>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Contrast raw shell execution against the structural safety and discovery patterns
+      of MCP using software engineering principles.
+
+      Execution Interface: Exposing a raw Bash tool to an LLM is like calling eval() on raw,
+      untrusted user strings. An MCP server acts like an RPC interface with a strict, type-safe
+      API contract.
+
+      Memory Safety: Standard shell execution is like raw pointer arithmetic. An MCP tool call
+      is like object-oriented encapsulation; the internals are private.
+
+      Security Sandbox: Running a generic shell gives the LLM "Ring 0" system access. An MCP
+      server runs on capability-based security under least-privilege rules.
+
+      Service Discovery: To learn shell utilities, an agent must scrape help manuals. An MCP
+      server exposes self-describing endpoints (tools/list) for instant discovery.
+    </aside>
+  </section>
+
+  <!-- ==================== Section E: From CLI to MCP ==================== -->
+
+  <!-- Slide 11: Dual-Mode Design (Divider) -->
+  <section class="slide-divider">
+    <div class="divider-wrapper">
+    <div class="divider-left">
+      <span class="section-marker">From CLI to MCP</span>
+      <h2>From CLI<br>to MCP</h2>
+    </div>
+    <div class="divider-right">
+      <p>Adding MCP Support to My CLI</p>
+      <pre><code class="language-text">[ kubectl-mtv ]
+      │
+  ┌───┴───┐
+  ▼       ▼
+[CLI]   [MCP Server]</code></pre>
+    </div>
+    </div>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Highlight the architectural shift of embedding MCP runtimes directly inside
+      existing Go-based CLI tooling.
+
+      A major development in CLI design is embedding the MCP server directly inside
+      the original binary.
+
+      kubectl-mtv is built this way. The exact same executable serves two roles.
+
+      Run standard commands like kubectl mtv get plans and it outputs human-readable tables.
+
+      Run kubectl mtv mcp-server --sse --port 8081 and it enters background daemon mode,
+      spinning up an HTTP server that speaks Model Context Protocol over Server-Sent Events (SSE).
+
+      No external node scripts, no separate docker images, and no integration drift.
+      Let's trace how the HTTP connection behaves in real-time.
+    </aside>
+  </section>
+
+  <!-- Slide: cli2mcp Demo -->
+  <section class="slide-content">
+    <span class="section-marker">From CLI to MCP</span>
+    <h2>So You Want to Implement MCP?</h2>
+    <h4>Add Custom Code to Your CLI, or Just Automate Using --help</h4>
+    <pre><code class="language-bash"># Scan the CLI's --help output → generate MCP tools
+cli2mcp scan kubectl-mtv -o mtv.tools.json
+
+# Start an MCP server exposing those tools
+cli2mcp serve mtv.tools.json</code></pre>
+    <pre><code class="language-json">{"command": "kubectl-mtv", "tools": [
+  {"name": "get",    "description": "Get resources",
+   "args": [{"name": "resource", "type": "string"}]},
+  {"name": "create", "description": "Create resources", ...},
+  {"name": "health", "description": "Check MTV health", ...}
+]}</code></pre>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Show the fastest path from an existing CLI to MCP — two commands.
+
+      cli2mcp is a Python library that scans a CLI tool's --help output,
+      extracts its arguments and subcommands, and generates a JSON descriptor.
+      It then serves that file as a fully functional MCP server.
+
+      Step 1: cli2mcp scan reads kubectl-mtv --help, walks every subcommand,
+      and writes a tools JSON file with names, descriptions, and argument schemas.
+
+      Step 2: cli2mcp serve starts a stdio-based MCP server. Every entry in the
+      JSON becomes a callable tool. When the model calls "get", cli2mcp runs
+      subprocess.run(["kubectl-mtv", "get", ...]) under the hood.
+
+      No code changes to your CLI. No SDK integration. Just scan and serve.
+    </aside>
+  </section>
+
+  <!-- Slide: SSE Channel -->
+  <section class="slide-content">
+    <span class="section-marker">From CLI to MCP</span>
+    <h2>Establishing the SSE Channel</h2>
+    <h4>Step 1</h4>
+    <pre><code class="language-bash">curl -i -N http://localhost:8081/sse</code></pre>
+    <pre><code class="language-text">HTTP/1.1 200 OK
+Content-Type: text/event-stream
+Connection: keep-alive
+
+event: endpoint
+data: /message?sessionId=session_9a7c3b21</code></pre>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Demystify how MCP over Server-Sent Events establishes a persistent connection.
+
+      To connect to an HTTP-based MCP server, the client must first perform an HTTP GET
+      request on the /sse route.
+
+      The server keeps this connection open (Connection: keep-alive) and returns an event-stream.
+
+      The very first message the server streams is an endpoint event containing the unique
+      session path: /message?sessionId=session_9a7c3b21.
+
+      From now on, the client will stream incoming events down this open GET channel, while
+      sending outgoing JSON-RPC requests via standard HTTP POSTs to that custom /message endpoint.
+    </aside>
+  </section>
+
+  <!-- Slide 13: Handshake & Discovery -->
+  <section class="slide-content">
+    <span class="section-marker">From CLI to MCP</span>
+    <h2>Handshake and Tool Discovery</h2>
+    <h4>Step 2</h4>
+    <pre><code class="language-bash"># Initialize handshake
+curl -X POST "$ENDPOINT" -d '{"jsonrpc": "2.0",
+  "method": "initialize", "id": 1,
+  "params": {"protocolVersion": "2024-11-05",
+             "clientInfo": {"name": "demo", "version": "1.0"}}}'
+
+# Discover available tools
+curl -X POST "$ENDPOINT" -d '{"jsonrpc": "2.0",
+  "method": "tools/list", "id": 2}'</code></pre>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Show the initialization handshake and tool discovery over POST.
+
+      Once the SSE GET stream is active, we trigger our handshake by POSTing an initialize
+      request to our session-based message endpoint.
+
+      The server accepts the POST instantly, while the actual JSON-RPC replies are streamed
+      asynchronously down the active GET channel we set up on the previous slide.
+
+      Next, we send a standard tools/list request. The embedded Go MCP server replies over
+      the active stream with the exact schema definitions for our tools, advertising its
+      local execution capabilities to the model.
+    </aside>
+  </section>
+
+  <!-- Slide 14: Tool Execution -->
+  <section class="slide-content">
+    <span class="section-marker">From CLI to MCP</span>
+    <h2>Tool Execution</h2>
+    <h4>HTTP vs. CLI</h4>
+    <pre><code class="language-bash"># Path A: via MCP HTTP POST
+curl -X POST "$ENDPOINT" -d '{"jsonrpc": "2.0",
+  "method": "tools/call", "id": 3,
+  "params": {"name": "mtv_read",
+             "arguments": {"command": "get plan"}}}'</code></pre>
+    <pre><code class="language-bash"># Path B: via CLI
+kubectl mtv get plans</code></pre>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Directly contrast how the human operator and the machine assistant read the
+      same resource outputs.
+
+      Let's look at this side-by-side execution trace.
+
+      On the left, we use the HTTP-based protocol. We POST a tools/call for mtv_read,
+      passing get plans as our target command argument.
+
+      On the right, we run the tool as a standard CLI plugin. We get clean, tabbed output
+      formatted for a developer.
+
+      The underlying logic, authentication, and execution are identical. Only the
+      communication interface has changed.
+    </aside>
+  </section>
+
+  <!-- Slide 15: Agent Tracing -->
+  <section class="slide-content">
+    <span class="section-marker">From CLI to MCP</span>
+    <h2>Live Agent Session</h2>
+    <h4>Tracing with mtv-agent</h4>
+    <pre><code class="language-bash">mtv-agent start --log-level=DEBUG --dump-http
+
+# User: "Why is migration plan 'plan-01' failing?"
+
+# [DEBUG] Inbound payload:
+# {"model":"instruct", "messages":[...],
+#  "tools":[{"name":"mtv_read"}]}</code></pre>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Goal: Show how high-level agents utilize these underlying tools, exposing the active
+      logging trace in the terminal.
+
+      To close the loop, let's look at a live debugging session with mtv-agent.
+
+      We set our logger to DEBUG and launch the agent framework.
+
+      When we ask a complex diagnostic question like "Why is migration plan 'plan-01' failing?",
+      we can watch the complete JSON handshake.
+
+      The framework intercepts our system state, packages it with our registered MCP tool
+      definition schemas, issues the HTTP requests, and processes the returned tool triggers
+      live in our terminal logs.
+
+      We have successfully traced the entire path — from raw tensor parameters inside Python
+      to standard web-safe, strongly typed enterprise integrations!
+    </aside>
+  </section>
+
+  <!-- Thank You / Questions -->
+  <section class="slide-title slide-thankyou">
+    <div class="title-wrapper">
+      <div class="title-left">
+        <span class="title-vertical-text">DevConf.CZ 2026</span>
+        <div class="title-left-accent"></div>
+      </div>
+      <div class="title-right">
+        <h1>Thank You</h1>
+        <h3>Questions?</h3>
+        <div class="presenter-info">
+          Yaacov Zamir &lt;yzamir@redhat.com&gt;<br>
+          github.com/kubev2v/migration-toolkit-for-virtualization
+        </div>
+        <img class="title-logo" src="themes/redhat/Logo-Red_Hat-A-Standard-RGB.Large_logo_transparent.png" alt="Red Hat">
+      </div>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<script src="vendor/node_modules/reveal.js/dist/reveal.js"></script>
+<script src="vendor/node_modules/reveal.js/plugin/highlight/highlight.js"></script>
+<script src="vendor/node_modules/reveal.js/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: true,
+    width: 960,
+    height: 540,
+    margin: 0,
+    plugins: [ RevealHighlight, RevealNotes ]
+  });
+
+  // Hide default Reveal.js slide number; inject custom in-slide page numbers
+  Reveal.on('ready', function() {
+    var el = document.querySelector('.reveal .slide-number');
+    if (el) el.style.display = 'none';
+
+    var slides = document.querySelectorAll('.reveal .slides > section');
+    slides.forEach(function(section, idx) {
+      var num = idx + 1;
+      if (section.classList.contains('slide-toc')) return;
+
+      if (section.classList.contains('slide-title')) {
+        if (section.querySelector('.title-page-number')) return;
+        var span = document.createElement('span');
+        span.className = 'title-page-number';
+        span.textContent = num;
+        var left = section.querySelector('.title-left');
+        if (left) left.appendChild(span);
+        return;
+      }
+
+      var span = document.createElement('span');
+      span.className = 'content-page-number';
+      span.textContent = num;
+
+      if (section.classList.contains('slide-divider')) {
+        var wrapper = section.querySelector('.divider-wrapper');
+        if (wrapper) wrapper.appendChild(span);
+      } else {
+        section.appendChild(span);
+      }
+    });
+  });
+</script>
+</body>
+</html>

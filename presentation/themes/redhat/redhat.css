@@ -1,0 +1,713 @@
+/* ==========================================================================
+   Red Hat Branded Reveal.js Theme
+   Based on official Red Hat presentation templates
+   ========================================================================== */
+
+/* --- @font-face declarations (theme/fonts) --- */
+
+@font-face {
+  font-family: 'Red Hat Display';
+  src: url('fonts/RedHatDisplay-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Red Hat Display';
+  src: url('fonts/RedHatDisplay-LightItalic.otf') format('opentype');
+  font-weight: 300;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Red Hat Display';
+  src: url('fonts/RedHatDisplay-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Red Hat Display';
+  src: url('fonts/RedHatDisplay-Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Red Hat Display';
+  src: url('fonts/RedHatDisplay-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Red Hat Display';
+  src: url('fonts/RedHatDisplay-MediumItalic.otf') format('opentype');
+  font-weight: 500;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Red Hat Display';
+  src: url('fonts/RedHatDisplay-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Red Hat Display';
+  src: url('fonts/RedHatDisplay-BoldItalic.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Red Hat Display';
+  src: url('fonts/RedHatDisplay-Black.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Red Hat Text';
+  src: url('fonts/RedHatText-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Red Hat Text';
+  src: url('fonts/RedHatText-Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Red Hat Text';
+  src: url('fonts/RedHatText-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Red Hat Text';
+  src: url('fonts/RedHatText-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Red Hat Mono';
+  src: url('fonts/RedHatMono-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Red Hat Mono';
+  src: url('fonts/RedHatMono-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Red Hat Mono';
+  src: url('fonts/RedHatMono-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Red Hat Mono';
+  src: url('fonts/RedHatMono-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+/* --- Color variables --- */
+
+:root {
+  --rh-red:      #ee0000;
+  --rh-red-60:   #a60000;
+  --rh-red-70:   #5f0000;
+  --rh-red-40:   #f56e6e;
+  --rh-red-10:   #fce3e3;
+  --rh-white:    #ffffff;
+  --rh-gray-20:  #e0e0e0;
+  --rh-gray-40:  #a3a3a3;
+  --rh-gray-60:  #4d4d4d;
+  --rh-gray-80:  #292929;
+  --rh-black:    #000000;
+}
+
+/* --- Base Reveal.js overrides --- */
+
+.reveal-viewport {
+  background: var(--rh-white);
+  background-color: var(--rh-white);
+}
+
+.reveal {
+  font-family: 'Red Hat Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--rh-black);
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  font-family: 'Red Hat Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  text-shadow: none;
+  word-wrap: break-word;
+}
+
+.reveal h1 { font-size: 2.2em; color: var(--rh-red); font-weight: 700; }
+.reveal h2 { font-size: 1.4em; color: var(--rh-black); font-weight: 300; }
+.reveal h3 { font-size: 1.1em; color: var(--rh-black); font-weight: 500; }
+.reveal h4 { font-size: 0.85em; color: var(--rh-red); font-weight: 400; font-style: italic; }
+
+.reveal p,
+.reveal li {
+  line-height: 1.5;
+}
+
+.reveal strong { font-weight: 700; }
+
+.reveal a { color: var(--rh-red); text-decoration: underline; }
+.reveal a:hover { color: var(--rh-red-60); }
+
+.reveal .slide-number {
+  font-family: 'Red Hat Text', sans-serif;
+  font-size: 9px;
+  color: var(--rh-gray-60);
+  background: transparent;
+  right: auto;
+  left: 18px;
+  bottom: 38px;
+}
+
+/* --- Bullet styling: red triangles --- */
+
+.reveal ul { list-style: none; padding-left: 1.2em; }
+.reveal ul li { position: relative; margin-bottom: 0.5em; }
+.reveal ul li::before {
+  content: '▸';
+  color: var(--rh-red);
+  font-size: 0.9em;
+  position: absolute;
+  left: -1.2em;
+  top: 0;
+}
+
+.reveal ol { padding-left: 1.4em; }
+.reveal ol li { margin-bottom: 0.5em; }
+.reveal ol li::marker { color: var(--rh-red); font-weight: 700; }
+
+/* --- Table styling --- */
+
+.reveal table {
+  font-size: 0.6em;
+  border-collapse: collapse;
+  margin: 1em auto;
+}
+.reveal table th {
+  background: var(--rh-gray-80);
+  color: var(--rh-white);
+  font-family: 'Red Hat Display', sans-serif;
+  font-weight: 500;
+  padding: 0.5em 0.8em;
+  text-align: left;
+}
+.reveal table td {
+  padding: 0.45em 0.8em;
+  border-bottom: 1px solid var(--rh-gray-20);
+  text-align: left;
+}
+.reveal table tbody tr:last-child td { border-bottom: 2px solid var(--rh-red); }
+
+/* --- Code block styling --- */
+
+.reveal pre {
+  font-size: 0.38em;
+  width: 92%;
+  margin: 0.8em auto;
+  box-shadow: none;
+  border: 1px solid var(--rh-gray-20);
+  border-left: 3px solid var(--rh-red);
+  border-radius: 2px;
+}
+
+.reveal pre code {
+  font-family: 'Red Hat Mono', 'Fira Code', 'Consolas', monospace;
+  background: var(--rh-gray-80);
+  color: #e0e0e0;
+  padding: 1em 1.2em;
+  max-height: 520px;
+  tab-size: 2;
+  border-radius: 2px;
+  line-height: 1.6;
+}
+
+.reveal code {
+  font-family: 'Red Hat Mono', 'Fira Code', 'Consolas', monospace;
+  tab-size: 2;
+}
+
+.reveal p code,
+.reveal li code {
+  background: var(--rh-red-10);
+  color: var(--rh-red-60);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+/* --- Diagram / pipeline text --- */
+
+.reveal .pipeline {
+  font-family: 'Red Hat Mono', monospace;
+  font-size: 0.55em;
+  color: var(--rh-gray-60);
+  white-space: pre;
+  text-align: left;
+}
+
+/* ==========================================================================
+   SLIDE TYPE: CONTENT (default for most slides)
+   Top red line, section marker top-left, favicon footer bottom-right
+   ========================================================================== */
+
+.reveal .slides section {
+  text-align: left;
+  padding: 60px 60px 70px 70px;
+  box-sizing: border-box;
+}
+
+.reveal .slides section.slide-content {
+  padding-top: 70px;
+}
+
+/* Top-left vertical accent bar (content slides) — 1px at x=36, matching toc/title */
+.reveal .slides section.slide-content::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 36px;
+  width: 1px;
+  height: 54px;
+  background: var(--rh-red);
+}
+
+/* Section marker (red text, no border — accent bar via ::before) */
+.reveal .section-marker {
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 0.3em;
+  font-weight: 400;
+  color: var(--rh-red);
+  position: absolute;
+  top: 18px;
+  left: 74px;
+  padding-left: 0;
+  border-left: none;
+  line-height: 1.3;
+}
+
+/* Content slide H2 — reference: 0.84em, weight 300 (Light) */
+.reveal .slides section.slide-content h2 {
+  text-align: center;
+  font-size: 0.84em;
+  font-weight: 300;
+  margin-bottom: 0.5em;
+}
+
+/* Content slide subheading — non-italic, smaller than heading */
+.reveal .slides section.slide-content h4 {
+  text-align: center;
+  font-size: 0.5em;
+  font-weight: 400;
+  font-style: normal;
+  margin-top: 0;
+  margin-bottom: 2.4em;
+}
+
+/* Footer favicon (on content, toc, divider slides) — match title logo size */
+.reveal .slide-footer {
+  position: absolute;
+  bottom: 22px;
+  right: 40px;
+  height: 29px;
+  width: auto;
+  opacity: 1;
+}
+
+/* Bottom-left red line (content slides) — 1px at x=36, from bottom, matching title/toc */
+.reveal .slides section.slide-content::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 36px;
+  width: 1px;
+  height: 35px;
+  background: var(--rh-red);
+}
+
+/* Page number for content/divider slides — matching title/toc positioning */
+.reveal .content-page-number {
+  position: absolute;
+  bottom: 40px;
+  left: 36px;
+  transform: translateX(-50%);
+  font-family: 'Red Hat Text', sans-serif;
+  font-size: 0.28em;
+  font-weight: 400;
+  color: var(--rh-gray-60);
+  text-align: center;
+  z-index: 4;
+}
+
+/* ==========================================================================
+   SLIDE TYPE: TITLE
+   Left dark panel ~43%, right white panel ~57%, full logo bottom-right
+   No top red line
+   ========================================================================== */
+
+.reveal .slides section.slide-title {
+  padding: 0 !important;
+  text-align: left;
+  height: 540px !important;
+}
+
+.reveal .slides section.slide-title .title-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+}
+
+/* Left panel: dark navy strip + background photo area */
+.reveal .slides section.slide-title .title-left {
+  flex: 0 0 37%;
+  background: var(--rh-gray-80);
+  background-image: url('background.jpg');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dark navy/purple strip at far left edge — reference: 64px (6.7%) */
+.reveal .slides section.slide-title .title-left::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 64px;
+  background: #1a0a3e;
+  z-index: 2;
+}
+
+/* Vertical text on navy strip — top-to-bottom, aligned to top (per reference) */
+.reveal .slides section.slide-title .title-vertical-text {
+  position: absolute;
+  top: 30px;
+  left: 38px;
+  transform-origin: 0 0;
+  transform: rotate(90deg);
+  white-space: nowrap;
+  font-family: 'Red Hat Text', sans-serif;
+  font-size: 0.32em;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.05em;
+  z-index: 3;
+}
+
+/* Page number on navy strip — centered on red line, directly above it */
+.reveal .slides section.slide-title .title-page-number {
+  position: absolute;
+  bottom: 42px;
+  left: 36px;
+  transform: translateX(-50%);
+  font-family: 'Red Hat Text', sans-serif;
+  font-size: 0.28em;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  z-index: 4;
+}
+
+/* Red vertical accent line — 1px wide at x=36, from bottom edge up */
+.reveal .slides section.slide-title .title-left-accent {
+  position: absolute;
+  bottom: 0;
+  left: 36px;
+  width: 1px;
+  height: 35px;
+  background: var(--rh-red);
+  z-index: 4;
+}
+
+/* Right panel: white area with title content — 107px left gap from image edge */
+.reveal .slides section.slide-title .title-right {
+  flex: 1;
+  padding: 160px 50px 40px 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+}
+
+/* Title: red, light weight — reference: y=198px, line-height 1.73 */
+.reveal .slides section.slide-title h1 {
+  font-size: 1.75em;
+  color: var(--rh-red);
+  font-weight: 400;
+  margin: 0 0 0.25em 0;
+  line-height: 1.2;
+}
+
+/* Subheading: black, regular weight */
+.reveal .slides section.slide-title h3 {
+  font-size: 1.0em;
+  color: var(--rh-black);
+  font-weight: 400;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Presenter info — reference: y=423px, 77px below subheading, color rgb(21,21,21) */
+.reveal .slides section.slide-title .presenter-info {
+  font-family: 'Red Hat Text', sans-serif;
+  font-size: 0.42em;
+  font-weight: 400;
+  color: #151515;
+  margin-top: 4.5em;
+  line-height: 1.6;
+}
+
+/* Logo: bottom-right — reference: hat ~23px tall */
+.reveal .slides section.slide-title .title-logo {
+  position: absolute;
+  bottom: 22px;
+  right: 40px;
+  height: 29px;
+  width: auto;
+}
+
+/* Thank you slide: alternate background image */
+.reveal .slides section.slide-thankyou .title-left {
+  background-image: url('background-1.jpg');
+}
+
+/* (e) Slide number on title slide: position on dark left panel, white text */
+.reveal .slides section.slide-title ~ .slide-number,
+.reveal.slide-title-active .slide-number {
+  color: var(--rh-white);
+}
+
+/* ==========================================================================
+   SLIDE TYPE: TOC (Agenda)
+   No top red line. Vertical accent bar at x=36 next to section marker.
+   Bottom-left: 1px red line + page number (same as title slide).
+   ========================================================================== */
+
+.reveal .slides section.slide-toc {
+  padding: 60px 60px 70px 70px;
+  position: relative;
+}
+
+/* Top vertical accent bar — reference: x=36, y=11-64, 1px, 54px tall */
+.reveal .slides section.slide-toc .section-marker {
+  position: absolute;
+  top: 18px;
+  left: 74px;
+  padding-left: 0;
+  border-left: none;
+}
+
+.reveal .slides section.slide-toc::before {
+  content: '';
+  position: absolute;
+  top: 11px;
+  left: 36px;
+  width: 1px;
+  height: 54px;
+  background: var(--rh-red);
+}
+
+/* Bottom-left red accent — reference: x=36, bottom 0, 35px tall, 1px */
+.reveal .slides section.slide-toc::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 36px;
+  width: 1px;
+  height: 35px;
+  background: var(--rh-red);
+}
+
+/* Page number on TOC slide — above red line, dark text on white bg */
+.reveal .slides section.slide-toc .toc-page-number {
+  position: absolute;
+  bottom: 42px;
+  left: 36px;
+  transform: translateX(-50%);
+  font-family: 'Red Hat Text', sans-serif;
+  font-size: 0.28em;
+  font-weight: 400;
+  color: var(--rh-gray-60);
+  text-align: center;
+  z-index: 4;
+}
+
+.reveal .slides section.slide-toc .toc-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 40px;
+  margin-top: 60px;
+}
+
+.reveal .slides section.slide-toc .toc-intro {
+  flex: 0 0 38%;
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 1.6em;
+  font-weight: 300;
+  color: var(--rh-red);
+  line-height: 1.2;
+}
+
+.reveal .slides section.slide-toc .toc-topics {
+  flex: 1;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.reveal .slides section.slide-toc .toc-topics li {
+  margin-bottom: 1em;
+  padding-left: 1.2em;
+  position: relative;
+}
+
+.reveal .slides section.slide-toc .toc-topics li::before {
+  content: '▸';
+  color: var(--rh-red);
+  position: absolute;
+  left: 0;
+  top: 0.05em;
+  font-size: 0.65em;
+}
+
+.reveal .slides section.slide-toc .toc-topics .topic-name {
+  font-family: 'Red Hat Text', sans-serif;
+  font-weight: 400;
+  font-size: 0.65em;
+  color: var(--rh-black);
+  display: block;
+}
+
+.reveal .slides section.slide-toc .toc-topics .topic-detail {
+  font-family: 'Red Hat Text', sans-serif;
+  font-weight: 400;
+  font-size: 0.45em;
+  color: var(--rh-red);
+  display: block;
+  margin-top: 0.15em;
+}
+
+/* ==========================================================================
+   SLIDE TYPE: DIVIDER
+   Left ~65% white with large red title, right ~35% light gray panel
+   ========================================================================== */
+
+.reveal .slides section.slide-divider {
+  padding: 0 !important;
+  text-align: left;
+  height: 540px !important;
+}
+
+.reveal .slides section.slide-divider .divider-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.reveal .slides section.slide-divider .divider-left {
+  flex: 0 0 63%;
+  padding: 80px 40px 60px 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.reveal .slides section.slide-divider .divider-right {
+  flex: 1;
+  background: #f0f0f0;
+  padding: 80px 40px 60px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.reveal .slides section.slide-divider .divider-left h2 {
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 1.8em;
+  font-weight: 300;
+  color: var(--rh-red);
+  line-height: 1.15;
+  text-align: left;
+}
+
+.reveal .slides section.slide-divider .divider-right p,
+.reveal .slides section.slide-divider .divider-right pre {
+  font-size: 0.55em;
+  color: var(--rh-black);
+  line-height: 1.6;
+}
+
+.reveal .slides section.slide-divider .divider-right pre {
+  width: 100%;
+  margin: 0;
+  border: none;
+  border-left: 3px solid var(--rh-red);
+}
+
+/* Divider top-left vertical accent bar — 1px at x=36, matching content/toc */
+.reveal .slides section.slide-divider .divider-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 36px;
+  width: 1px;
+  height: 54px;
+  background: var(--rh-red);
+  z-index: 2;
+}
+
+/* Divider bottom-left red line — 1px at x=36, matching content/toc */
+.reveal .slides section.slide-divider .divider-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 36px;
+  width: 1px;
+  height: 35px;
+  background: var(--rh-red);
+  z-index: 2;
+}
+
+/* Divider section marker positioned inside wrapper */
+.reveal .slides section.slide-divider .section-marker {
+  position: absolute;
+  top: 18px;
+  left: 74px;
+  z-index: 3;
+}
+
+/* Divider footer favicon */
+.reveal .slides section.slide-divider .slide-footer {
+  position: absolute;
+  bottom: 14px;
+  right: 24px;
+  z-index: 3;
+}

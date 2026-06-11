@@ -376,46 +376,7 @@ mcp.run(transport="sse", port=8081)</code></pre>
     </aside>
   </section>
 
-  <!-- Slide: Semantic CLI Help -->
-  <section class="slide-content">
-    <span class="section-marker">Skills or Tools</span>
-    <h2>Agent-Ready CLIs</h2>
-    <h4>Semantic Help for Agentic Flow</h4>
-    <pre><code class="language-text">$ oc mtv help
-Migration Toolkit for Virtualization (MTV) CLI.
-Migrate virtual machines from VMware vSphere, oVirt (RHV),
-OpenStack, and OVA to KubeVirt on OpenShift/Kubernetes.
-
-Available Commands:
-  create      Create resources
-  delete      Delete resources
-  get         Get resources
-  health      Check the health of the MTV/Forklift system
-  mcp-server  Start the MCP (Model Context Protocol) server</code></pre>
-    <p style="font-size:0.38em; font-style:italic; color:var(--rh-gray-40); margin-top:0.8em;">* AI agents can use --help to learn how to use new CLI commands they don't know.</p>
-    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
-    <aside class="notes">
-      [~2 min]
-
-      This is real output from oc mtv help. Notice how clean it is.
-
-      A strong semantic header tells the agent what this tool does at a high level. Clean
-      command verbs — get, create, health — map directly to operational intents.
-
-      When an agent gets access to a bash shell, the first thing it does is run --help.
-      If your CLI has well-structured help text, the agent can figure out how to use it
-      on its own.
-
-      This is what we call an "agent-ready CLI" — designed so both humans and machines
-      can parse it.
-
-      But there's a catch: even a well-designed CLI is still just text. The agent has to
-      parse help output, guess at argument formats, and hope for the best. What if we
-      could give it something more structured?
-    </aside>
-  </section>
-
-  <!-- Slide 10: CS Analogies -->
+  <!-- Slide: Bash Tool vs. MCP Server -->
   <section class="slide-content">
     <span class="section-marker">Skills or Tools</span>
     <h2>Bash Tool vs. MCP Server</h2>
@@ -445,8 +406,47 @@ bash -c "kubectl mtv get plan | grep -i fail"
       For quick prototyping and trusted environments, bash works fine. For production agents
       handling real workloads, you want the guardrails of MCP.
 
-      So how hard is it to add MCP to an existing CLI? Turns out — surprisingly easy.
-      Let's see it.
+      But if you do go the bash route — what makes it actually work? It comes down to
+      how your CLI presents itself. Let's look at that.
+    </aside>
+  </section>
+
+  <!-- Slide: Semantic CLI Help -->
+  <section class="slide-content">
+    <span class="section-marker">Skills or Tools</span>
+    <h2>Agent-Ready CLIs</h2>
+    <h4>Semantic Help for Agentic Flow</h4>
+    <pre><code class="language-text">$ oc mtv help
+Migration Toolkit for Virtualization (MTV) CLI.
+Migrate virtual machines from VMware vSphere, oVirt (RHV),
+OpenStack, and OVA to KubeVirt on OpenShift/Kubernetes.
+
+Available Commands:
+  create      Create resources
+  delete      Delete resources
+  get         Get resources
+  health      Check the health of the MTV/Forklift system
+  mcp-server  Start the MCP (Model Context Protocol) server</code></pre>
+    <p style="font-size:0.38em; font-style:italic; color:var(--rh-gray-40); margin-top:0.8em;">* AI agents can use --help to learn how to use new CLI commands they don't know.</p>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      [~2 min]
+
+      So if you pick the skills-plus-bash path, here's what makes it work.
+
+      This is real output from oc mtv help. Notice how clean it is — a strong semantic
+      header tells the agent what this tool does, and clean command verbs like get, create,
+      health map directly to operational intents.
+
+      When an agent gets a bash shell, the first thing it does is run --help. If your CLI
+      has well-structured help text like this, the agent can figure out how to use it on
+      its own — no MCP server needed.
+
+      This is what we call an "agent-ready CLI" — designed so both humans and machines
+      can parse it. Skills plus bash plus good help text gets you surprisingly far.
+
+      But what if you want the full structured approach? Let's see how to add MCP support
+      to an existing CLI.
     </aside>
   </section>
 
@@ -493,13 +493,14 @@ cli2mcp scan kubectl-mtv -o mtv.tools.json
 
 # Start an MCP server exposing those tools (streamable HTTP)
 cli2mcp serve mtv.tools.json -t streamable-http</code></pre>
-    <pre><code class="language-json">{"command": "kubectl-mtv", "tools": [
-  {"name": "get",    "description": "Get resources",
-   "args": [{"name": "resource", "type": "string"}]},
-  {"name": "create", "description": "Create resources", ...},
-  {"name": "health", "description": "Check MTV health", ...}
-]}</code></pre>
-    <p style="font-size:0.38em; font-style:italic; color:var(--rh-gray-40); margin-top:0.8em;">* You can add a specially crafted MCP server, automate it in your CLI code, or even automate it by parsing --help.</p>
+    <pre><code class="language-text">                                    MCP client
+                                        |
+cli2mcp scan kubectl-mtv  →  .json      |
+                               |        |
+                          cli2mcp serve &lt;+
+                               |
+                          subprocess.run(["kubectl-mtv", ...])</code></pre>
+    <p style="font-size:0.38em; font-style:italic; color:var(--rh-gray-40); margin-top:0.8em;">* Works with any CLI: auto-detects GNU, Cobra, and plain --help styles.</p>
     <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
     <aside class="notes">
       [~2 min — DEMO: bash demo/d1-cli2mcp.sh]
@@ -507,13 +508,15 @@ cli2mcp serve mtv.tools.json -t streamable-http</code></pre>
       The fastest path from any CLI to MCP — two commands.
 
       "cli2mcp scan" reads your CLI's --help output, walks every subcommand, and generates
-      a JSON file with tool schemas — names, descriptions, argument types.
+      a JSON file with tool schemas — names, descriptions, argument types. It auto-detects
+      the help format: GNU (argparse, click), Cobra (kubectl, oc, docker), or plain (curl).
 
       "cli2mcp serve" starts an MCP server from that JSON. Every entry becomes a callable
-      tool. When the model calls "get", cli2mcp runs the underlying CLI command.
+      tool. When the model calls a tool, cli2mcp runs the underlying CLI command via
+      subprocess — the flow diagram shows the full pipeline.
 
       No code changes to your CLI. No SDK integration. Just scan and serve. This works
-      with any CLI that has reasonable --help output.
+      with any CLI that has reasonable --help output — curl, git, kubectl, you name it.
 
       Now let's look at what happens on the wire when a client connects to this MCP server.
     </aside>
@@ -611,11 +614,11 @@ kubectl mtv get plans</code></pre>
     <span class="section-marker">From CLI to MCP</span>
     <h2>Live Agent Session</h2>
     <h4>Tracing with mtv-agent</h4>
-    <pre><code class="language-bash">mtv-agent run --dump-http
+    <pre><code class="language-bash">mtv-agent run --dump-http-dir ./dumps
 
 # User: "Why is migration plan 'plan-01' failing?"
 
-# HTTP/LLM dumps saved to: ~/.mtv-agent/dumps/
+# LLM request/response dumps saved to: ./dumps/
 # {"model":"instruct", "messages":[...],
 #  "tools":[{"name":"mtv_read"}]}</code></pre>
     <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
@@ -624,9 +627,9 @@ kubectl mtv get plans</code></pre>
 
       This is the payoff. mtv-agent ties everything we've built up into a live agent loop.
 
-      We enable --dump-http so you can see every HTTP round-trip: the system prompt, the
-      tool schemas sent to the model, the model's tool_calls response, the MCP execution,
-      and the final answer assembled from results. Dumps are saved to ~/.mtv-agent/dumps/.
+      We use --dump-http-dir to save every HTTP round-trip to ./dumps/ so we can
+      inspect them live: the system prompt, the tool schemas sent to the model, the
+      model's tool_calls response, the MCP execution, and the final answer.
 
       Ask it "Why is migration plan plan-01 failing?" and watch the full cycle: user
       question → tool schema packaging → LLM inference → tool_calls response → MCP
@@ -640,6 +643,26 @@ kubectl mtv get plans</code></pre>
       to your cluster through typed, sandboxed MCP tools.
 
       Thank you — I'd love to take your questions.
+    </aside>
+  </section>
+
+  <!-- References -->
+  <section class="slide-content">
+    <span class="section-marker">From CLI to MCP</span>
+    <h2>References</h2>
+    <h4>Tools Used in This Talk</h4>
+    <pre><code class="language-text">cli2mcp        Turn any CLI into an MCP server
+               github.com/yaacov/cli2mcp
+
+kubectl-mtv    kubectl plugin for Forklift VM migrations
+               github.com/yaacov/kubectl-mtv
+
+mtv-agent      AI agent for MTV / Forklift migrations
+               github.com/kubev2v/mtv-agent</code></pre>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      Links to the three open-source tools we used today. All repos are public —
+      feel free to try them out, open issues, or contribute.
     </aside>
   </section>
 

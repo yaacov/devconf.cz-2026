@@ -28,6 +28,9 @@
           Yaacov Zamir &lt;yzamir@redhat.com&gt;<br>
           DevConf.CZ 2026
         </div>
+        <div class="talk-link" style="margin-top:0.4em; font-size:0.38em;">
+          <a href="https://github.com/yaacov/devconf.cz-2026" target="_blank" style="color:var(--rh-gray-40, #a3a3a3); text-decoration:none;">github.com/yaacov/devconf.cz-2026</a>
+        </div>
         <img class="title-logo" src="themes/redhat/Logo-Red_Hat-A-Standard-RGB.Large_logo_transparent.png" alt="Red Hat">
       </div>
     </div>
@@ -148,7 +151,16 @@ print(tokenizer.decode(outputs[0]))</code></pre>
     </aside>
   </section>
 
-  <!-- Slide 4: Instruct Model -->
+  <!-- Slide: Language Model Illustration -->
+  <section class="slide-content">
+    <span class="section-marker">Language Models</span>
+    <h2>Language Models</h2>
+    <h4>Text Completion — Predict the Next Word</h4>
+    <img src="images/language-modle.jpg" alt="Language model text completion" style="height:290px; max-width:92%; margin:0.3em auto; display:block; border-radius:4px; object-fit:contain;">
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+  </section>
+
+  <!-- Slide 6: Instruct Model -->
   <section class="slide-content">
     <span class="section-marker">Language Models</span>
     <h2>Instruct Model</h2>
@@ -184,9 +196,18 @@ print(tokenizer.decode(outputs[0]))</code></pre>
     </aside>
   </section>
 
+  <!-- Slide: Instruct Model Illustration -->
+  <section class="slide-content">
+    <span class="section-marker">Language Models</span>
+    <h2>Instruct Model</h2>
+    <h4>Fine-Tuned to Complete User–Assistant Templates</h4>
+    <img src="images/instruct-model.jpg" alt="Instruct model with user and assistant roles" style="height:290px; max-width:92%; margin:0.3em auto; display:block; border-radius:4px; object-fit:contain;">
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+  </section>
+
   <!-- ==================== Section B: Inference Servers ==================== -->
 
-  <!-- Slide 5: API Layer (Divider) -->
+  <!-- Slide 8: API Layer (Divider) -->
   <section class="slide-divider">
     <div class="divider-wrapper">
     <div class="divider-left">
@@ -217,7 +238,7 @@ print(tokenizer.decode(outputs[0]))</code></pre>
     </aside>
   </section>
 
-  <!-- Slide 6: Empty Tools Request -->
+  <!-- Slide 9: Empty Tools Request -->
   <section class="slide-content">
     <span class="section-marker">Inference Servers</span>
     <h2>Conversational Mode</h2>
@@ -249,7 +270,16 @@ print(tokenizer.decode(outputs[0]))</code></pre>
     </aside>
   </section>
 
-  <!-- Slide 7: Tools Schema -->
+  <!-- Slide: Tools Illustration -->
+  <section class="slide-content">
+    <span class="section-marker">Inference Servers</span>
+    <h2>Tool Usage</h2>
+    <h4>Fine-Tuned to Complete Text by Choosing a Tool</h4>
+    <img src="images/tools.jpg" alt="Model using tools to act" style="height:290px; max-width:92%; margin:0.3em auto; display:block; border-radius:4px; object-fit:contain;">
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+  </section>
+
+  <!-- Slide 11: Tools Schema -->
   <section class="slide-content">
     <span class="section-marker">Inference Servers</span>
     <h2>Tool Usage</h2>
@@ -281,7 +311,7 @@ print(tokenizer.decode(outputs[0]))</code></pre>
     </aside>
   </section>
 
-  <!-- Slide 8: Tool Call Payload -->
+  <!-- Slide 12: Tool Call Payload -->
   <section class="slide-content">
     <span class="section-marker">Inference Servers</span>
     <h2>Tool Usage</h2>
@@ -411,6 +441,15 @@ bash -c "kubectl mtv get plan | grep -i fail"
     </aside>
   </section>
 
+  <!-- Slide: Bash vs MCP Illustration -->
+  <section class="slide-content">
+    <span class="section-marker">Skills or Tools</span>
+    <h2>Bash Tool vs. MCP Server</h2>
+    <h4>Many Tools vs. One Shell with a System Prompt</h4>
+    <img src="images/bash-mcp.jpg" alt="Bash tool versus MCP server comparison" style="height:290px; max-width:92%; margin:0.3em auto; display:block; border-radius:4px; object-fit:contain;">
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+  </section>
+
   <!-- Slide: Semantic CLI Help -->
   <section class="slide-content">
     <span class="section-marker">Skills or Tools</span>
@@ -452,7 +491,7 @@ Available Commands:
 
   <!-- ==================== Section E: From CLI to MCP ==================== -->
 
-  <!-- Slide 11: Dual-Mode Design (Divider) -->
+  <!-- Slide 18: Dual-Mode Design (Divider) -->
   <section class="slide-divider">
     <div class="divider-wrapper">
     <div class="divider-left">
@@ -550,7 +589,7 @@ data: /message?sessionId=session_9a7c3b21</code></pre>
     </aside>
   </section>
 
-  <!-- Slide 13: Handshake & Discovery -->
+  <!-- Slide 21: Handshake & Discovery -->
   <section class="slide-content">
     <span class="section-marker">From CLI to MCP</span>
     <h2>Handshake and Tool Discovery</h2>
@@ -580,7 +619,7 @@ curl -X POST "$ENDPOINT" -d '{"jsonrpc": "2.0",
     </aside>
   </section>
 
-  <!-- Slide 14: Tool Execution -->
+  <!-- Slide 22: Tool Execution -->
   <section class="slide-content">
     <span class="section-marker">From CLI to MCP</span>
     <h2>Tool Execution</h2>
@@ -609,7 +648,16 @@ kubectl mtv get plans</code></pre>
     </aside>
   </section>
 
-  <!-- Slide 15: Agent Tracing -->
+  <!-- Slide: Agent Illustration -->
+  <section class="slide-content">
+    <span class="section-marker">From CLI to MCP</span>
+    <h2>Live Agent Session</h2>
+    <h4>An Agent Picks the Right Tool for the Job</h4>
+    <img src="images/agent.jpg" alt="Agent selecting the right tool" style="height:290px; max-width:92%; margin:0.3em auto; display:block; border-radius:4px; object-fit:contain;">
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+  </section>
+
+  <!-- Slide 24: Agent Tracing -->
   <section class="slide-content">
     <span class="section-marker">From CLI to MCP</span>
     <h2>Live Agent Session</h2>
@@ -666,6 +714,15 @@ mtv-agent      AI agent for MTV / Forklift migrations
     </aside>
   </section>
 
+  <!-- Slide: Cat -->
+  <section class="slide-content">
+    <span class="section-marker">From CLI to MCP</span>
+    <h2>Cat</h2>
+    <h4>A Cat</h4>
+    <img src="images/cat.png" alt="Cat" style="height:290px; max-width:92%; margin:0.3em auto; display:block; border-radius:4px; object-fit:contain;">
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+  </section>
+
   <!-- Thank You / Questions -->
   <section class="slide-title slide-thankyou">
     <div class="title-wrapper">
@@ -680,7 +737,7 @@ mtv-agent      AI agent for MTV / Forklift migrations
           Yaacov Zamir &lt;yzamir@redhat.com&gt;<br>
           github.com/kubev2v/forklift
         </div>
-        <img class="thankyou-qr" src="devfonf-2026-github.png" alt="Presentation GitHub QR code" style="width:120px; margin-top:0.6em; display:block; margin-left:3.5em;">
+        <img class="thankyou-qr" src="images/devfonf-2026-github.png" alt="Presentation GitHub QR code" style="width:120px; margin-top:0.6em; display:block; margin-left:3.5em;">
         <img class="title-logo" src="themes/redhat/Logo-Red_Hat-A-Standard-RGB.Large_logo_transparent.png" alt="Red Hat">
       </div>
     </div>

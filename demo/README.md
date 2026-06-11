@@ -1,7 +1,7 @@
 # Demo Scripts
 
 Live demos for the "From CLI to MCP in 20 Minutes" talk.
-Files are prefixed `a1-`, `b1-`, `d1-` … matching the presentation sections.
+Files are prefixed `a1-`, `b1-`, `c1-`, `d1-` … matching the presentation sections.
 
 ## Setup
 
@@ -33,22 +33,27 @@ python a2-instruct-model.py
 |------|-------------|
 | `b1-curl-empty-tools.sh` | Chat completion with empty tools array (conversational mode) |
 | `b2-curl-with-tools.sh` | Chat completion with an `mtv_read` tool schema |
-| `b3-fastmcp-server.py` | Minimal MCP server using FastMCP |
-| `b4-mcp-list-tools.sh` | Initialize MCP session and list available tools |
-| `b5-mcp-call-tool.sh` | Initialize MCP session and call `get_plan` |
 
 ```bash
 bash b1-curl-empty-tools.sh
 bash b2-curl-with-tools.sh
-
-python b3-fastmcp-server.py        # start server, then in another terminal:
-bash b4-mcp-list-tools.sh
-bash b5-mcp-call-tool.sh
 ```
 
 ## Section C — Skills or Tools
 
-Conceptual slides — no runnable demos. To view the CLI help live:
+| File | Description |
+|------|-------------|
+| `c1-fastmcp-server.py` | Minimal MCP server using FastMCP |
+| `c2-mcp-list-tools.sh` | Initialize MCP session and list available tools |
+| `c3-mcp-call-tool.sh` | Initialize MCP session and call `get_plan` |
+
+```bash
+python c1-fastmcp-server.py        # start server, then in another terminal:
+bash c2-mcp-list-tools.sh
+bash c3-mcp-call-tool.sh
+```
+
+To view the CLI help live:
 
 ```bash
 oc mtv help

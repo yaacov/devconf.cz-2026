@@ -341,47 +341,13 @@ print(tokenizer.decode(outputs[0]))</code></pre>
       The model is no longer talking to us — it's calling our code. This is the foundation
       of every AI agent: model plus tool execution in a loop.
 
-      But who handles that tool call? We need a server on the other end. Let's build one.
-    </aside>
-  </section>
+      But who handles that tool call? We need a server on the other end.
 
-  <!-- Slide: FastMCP Python Example -->
-  <section class="slide-content">
-    <span class="section-marker">Inference Servers</span>
-    <h2>Your First MCP Server</h2>
-    <h4>Implementing the Tool Call</h4>
-    <pre><code class="language-python">from fastmcp import FastMCP
-import subprocess
+      The model is no longer talking to us — it's calling our code. This is the foundation
+      of every AI agent: model plus tool execution in a loop.
 
-mcp = FastMCP("mtv")
-
-@mcp.tool()
-def get_plan(namespace: str = "default") -> str:
-    """Get migration plans from the cluster"""
-    return subprocess.run(
-        ["kubectl", "mtv", "get", "plan", "-n", namespace],
-        capture_output=True, text=True).stdout
-
-mcp.run(transport="sse", port=8081)</code></pre>
-    <p style="font-size:0.38em; font-style:italic; color:var(--rh-gray-40); margin-top:0.8em;">* MCP (Model Context Protocol) standardizes how tools are discovered and called, regardless of model or server.</p>
-    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
-    <aside class="notes">
-      [~1.5 min — DEMO: show demo/b3-fastmcp-server.py]
-
-      This is the simplest possible MCP server — seven lines of real code.
-
-      Decorate a Python function with @mcp.tool(), and FastMCP generates the JSON schema
-      automatically from the type hints and docstring. It handles the protocol transport
-      and advertises the tool to any connecting client.
-
-      Under the hood, get_plan just shells out to kubectl mtv — the same CLI command the
-      model would have told us to run manually. But now it's wrapped in a standard protocol.
-
-      This is MCP — Model Context Protocol. It standardizes how tools are discovered and
-      called, regardless of which model or framework you use.
-
-      We understand the building blocks now. Let's talk about when you actually need MCP
-      versus simpler approaches.
+      But when do you actually need a structured tool server versus just giving the agent
+      a bash shell? Let's talk about that.
     </aside>
   </section>
 
@@ -484,8 +450,48 @@ Available Commands:
       This is what we call an "agent-ready CLI" — designed so both humans and machines
       can parse it. Skills plus bash plus good help text gets you surprisingly far.
 
-      But what if you want the full structured approach? Let's see how to add MCP support
-      to an existing CLI.
+      But what if you want the full structured approach? Let's see what a minimal MCP
+      server actually looks like.
+    </aside>
+  </section>
+
+  <!-- Slide: FastMCP Python Example -->
+  <section class="slide-content">
+    <span class="section-marker">Skills or Tools</span>
+    <h2>Your First MCP Server</h2>
+    <h4>Implementing the Tool Call</h4>
+    <pre><code class="language-python">from fastmcp import FastMCP
+import subprocess
+
+mcp = FastMCP("mtv")
+
+@mcp.tool()
+def get_plan(namespace: str = "default") -> str:
+    """Get migration plans from the cluster"""
+    return subprocess.run(
+        ["kubectl", "mtv", "get", "plan", "-n", namespace],
+        capture_output=True, text=True).stdout
+
+mcp.run(transport="sse", port=8081)</code></pre>
+    <p style="font-size:0.38em; font-style:italic; color:var(--rh-gray-40); margin-top:0.8em;">* MCP (Model Context Protocol) standardizes how tools are discovered and called, regardless of model or server.</p>
+    <img class="slide-footer" src="themes/redhat/RedHat_favicon_0319.Large_logo_transparent.png" alt="Red Hat">
+    <aside class="notes">
+      [~1.5 min — DEMO: show demo/c1-fastmcp-server.py]
+
+      This is the simplest possible MCP server — seven lines of real code.
+
+      Decorate a Python function with @mcp.tool(), and FastMCP generates the JSON schema
+      automatically from the type hints and docstring. It handles the protocol transport
+      and advertises the tool to any connecting client.
+
+      Under the hood, get_plan just shells out to kubectl mtv — the same CLI command the
+      model would have told us to run manually. But now it's wrapped in a standard protocol.
+
+      This is MCP — Model Context Protocol. It standardizes how tools are discovered and
+      called, regardless of which model or framework you use.
+
+      Now let's see how to add MCP support to an existing CLI without writing any server
+      code at all.
     </aside>
   </section>
 

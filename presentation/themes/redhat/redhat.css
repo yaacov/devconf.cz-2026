@@ -711,3 +711,57 @@
   right: 24px;
   z-index: 3;
 }
+
+/* ==========================================================================
+   References list (replaces code block on References slide)
+   ========================================================================== */
+
+.reveal .ref-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5em auto;
+  width: 92%;
+}
+
+.reveal .ref-list li::before {
+  content: none;
+}
+
+.reveal .ref-item {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5em 0;
+  border-bottom: 1px solid var(--rh-gray-20);
+}
+
+.reveal .ref-item:last-child {
+  border-bottom: none;
+}
+
+.reveal .ref-name {
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 0.6em;
+  font-weight: 500;
+  color: var(--rh-black);
+}
+
+.reveal .ref-desc {
+  font-family: 'Red Hat Text', sans-serif;
+  font-size: 0.42em;
+  font-weight: 400;
+  color: var(--rh-gray-60);
+  margin-top: 0.15em;
+}
+
+.reveal .ref-link {
+  font-family: 'Red Hat Mono', monospace;
+  font-size: 0.38em;
+  color: var(--rh-gray-60);
+  text-decoration: none;
+  margin-top: 0.15em;
+}
+
+.reveal .ref-link:hover {
+  color: var(--rh-black);
+}
+
